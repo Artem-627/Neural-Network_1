@@ -1,110 +1,48 @@
-#include <cmath>
 #include <iostream>
 #include <vector>
 
 #pragma once
 
-struct Connection {
-  void *neuron;
-  double weight;
-};
-
-std::ostream &operator<<(std::ostream &os, Connection cnc) {
-  os << cnc.neuron << "; " << cnc.weight;
-  return os;
-}
-
+// Класс нейрона
 class Neuron {
 private:
-  double value = 0;
-  double activation_value = 0;
-  double bias = 0;
+  double value = 0; // Значение без функции активации
+  double activation_value = 0; // Значение после применения функции активации
+  double bias = 0;             // Смещение нейрона
+
+  // Активационные функции
+  double Activation(const double &value);
+  double D_Activation(const double &value);
+
+  Neuron &operator=(Neuron const &);
+  Neuron(Neuron const &);
 
 public:
-  // std::vector<Connection> connections;
-  std::vector<Connection> connections_from;
+  // Структура связи между двумя нейронами (связывает нейрон с предыдущим
+  // нейроном)
+  struct Connection {
+    void *neuron;  // Адрес входного нейрона
+    double weight; // Вес связи
 
-  Neuron() {
-    std::cout << "[Create Neuron with adress " << this << ']' << '\n';
-  }
+    friend std::ostream &operator<<(std::ostream &os, const Connection &cnc);
+  };
 
-  void AddInput(Neuron &neuron, double weight) {
-    void *neuron_ptr = &neuron;
-    // this->connections.push_back(Connection({neuron_ptr, weight}));
-    this->connections_from.push_back(Connection({neuron_ptr, weight}));
-  }
+  std::vector<Connection> connections_from; // Вектор входных связей нейрона
+  Neuron();
 
-  // void Predict() {
-  //   for (int i = 0; i < this->connections.size(); ++i) {
-  //     Neuron *nrn = static_cast<Neuron *>(this->connections[i].neuron);
-  //     nrn->AddValue(this->value * this->connections[i].weight);
-  //     // nrn->Predict();
-  //   }
-  // }
+  // Основные действия с нейроном
+  void AddInput(Neuron &neuron, const double &weight);
+  void Predict();
+  void BackProp(const double &error, const double &learning_rate);
 
-  void Predict() {
-    for (int i = 0; i < this->connections_from.size(); ++i) {
-      Neuron *nrn = static_cast<Neuron *>(this->connections_from[i].neuron);
-      this->AddValue(nrn->value * this->connections_from[i].weight);
-      // nrn->Predict();
-    }
-    this->AddValue(this->bias);
-  }
+  // Действия со значением нейрона
+  void AddValue(const double &value);
+  void ClearValue();
+  void SetValue(const double &value);
 
-  void BackProp(double error, double learning_rate) {
-    this->bias -= learning_rate * error * D_Activation(this->activation_value);
-    for (int i = 0; i < this->connections_from.size(); ++i) {
-      Neuron *nrn = static_cast<Neuron *>(this->connections_from[i].neuron);
-      // nrn->AddValue(this->value * this->connections[i].weight);
-      this->connections_from[i].weight -= learning_rate * error *
-                                          D_Activation(this->activation_value) *
-                                          nrn->GetValue();
-      // nrn->Predict();
-    }
-  }
+  // Остальные сеттеры и геттеры
+  double GetValue() const;
+  double GetBias() const;
 
-  double Activation(double value) {
-    // if (value < 0) {
-    //   return 0;
-    // } else {
-    // return value;
-    // }
-    return (1 / (1 + exp(-value)));
-  }
-
-  double D_Activation(double value) {
-    // if (value < 0) {
-    //   return 0;
-    // } else {
-    // return 1;
-    // }
-    return this->Activation(value) * (1 + this->Activation(value));
-  }
-
-  void ClearValue() {
-    this->value = 0;
-    this->activation_value = 0;
-  }
-
-  double GetValue() const { return this->activation_value; }
-
-  double GetBias() const { return this->bias; }
-
-  void SetValue(double value) {
-    this->value = value;
-    activation_value = this->Activation(this->value);
-  }
-
-  void AddValue(double value) {
-    this->value += value;
-    activation_value = this->Activation(this->value);
-  }
+  friend std::ostream &operator<<(std::ostream &os, const Neuron &nrn);
 };
-
-std::ostream &operator<<(std::ostream &os, Neuron &nrn) {
-  os << &nrn << " [" << nrn.GetValue() << "]   ";
-  os << nrn.GetBias() << "  |  ";
-  for (auto cnc : nrn.connections_from)
-    os << '(' << cnc << "); ";
-  return os;
-}

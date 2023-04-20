@@ -14,7 +14,6 @@ void Learn(Neuron &nrn, Neuron &in1, Neuron &in2, int x, int y, int out) {
   // std::cout << nrn.GetValue() << '\n' << '\n';
 
   nrn.BackProp(nrn.GetValue() - out, learning_rate);
-  nrn.ClearValue();
 }
 
 int main() {
@@ -24,7 +23,7 @@ int main() {
   output[0].AddInput(input[0], 1.45);
   output[0].AddInput(input[1], 4.12);
 
-  for (int i = 0; i < 20; ++i) {
+  for (int i = 0; i < 100; ++i) {
     Learn(output[0], input[0], input[1], 2, 1, 1);
     Learn(output[0], input[0], input[1], 0, 0, -1);
     Learn(output[0], input[0], input[1], 1, 4, 1);
