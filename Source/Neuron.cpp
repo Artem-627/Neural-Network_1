@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#include "Source/Neuron.h"
+#include "Neuron.h"
 
 /* class Neuron */
 
